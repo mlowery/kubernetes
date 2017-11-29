@@ -72,6 +72,7 @@ import (
 	"k8s.io/kubernetes/pkg/kubelet/images"
 	"k8s.io/kubernetes/pkg/kubelet/kuberuntime"
 	"k8s.io/kubernetes/pkg/kubelet/lifecycle"
+	ebaylifecycle "k8s.io/kubernetes/pkg/kubelet/lifecycle/ebay"
 	"k8s.io/kubernetes/pkg/kubelet/metrics"
 	"k8s.io/kubernetes/pkg/kubelet/network"
 	"k8s.io/kubernetes/pkg/kubelet/pleg"
@@ -801,6 +802,7 @@ func NewMainKubelet(kubeCfg *componentconfig.KubeletConfiguration, kubeDeps *Kub
 
 	klet.appArmorValidator = apparmor.NewValidator(kubeCfg.ContainerRuntime)
 	klet.softAdmitHandlers.AddPodAdmitHandler(lifecycle.NewAppArmorAdmitHandler(klet.appArmorValidator))
+	klet.softAdmitHandlers.AddPodAdmitHandler(ebaylifecycle.NewWaitForHostnameAdmitHandler())
 	if utilfeature.DefaultFeatureGate.Enabled(features.Accelerators) {
 		if kubeCfg.ContainerRuntime == "docker" {
 			if klet.gpuManager, err = nvidia.NewNvidiaGPUManager(klet, klet.dockerClient); err != nil {
